@@ -36,7 +36,7 @@ impl DependencyGraph {
         let mut dependencies = HashMap::with_capacity(modules.len());
 
         for (module, contents) in modules {
-            if IGNORE_LIST.contains(&module.as_str()) {
+            if IGNORE_LIST.contains(&module.as_bytes()) {
                 continue;
             }
             let deps = contents

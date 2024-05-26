@@ -1,6 +1,8 @@
 use hashbrown::HashMap;
 use std::{fs, os::unix::prelude::OsStrExt, path::Path};
 
+use crate::IGNORE_LIST;
+
 #[derive(Clone)]
 pub struct DirWalker {
     pub size: usize,
@@ -22,6 +24,13 @@ impl DirWalker {
 
     fn walk<P: AsRef<Path>>(&mut self, root: P) -> std::io::Result<()> {
         for path in root.as_ref().read_dir()?.flatten() {
+            if path
+                .path()
+                .file_stem()
+                .is_some_and(|stem| IGNORE_LIST.contains(&stem.as_bytes()))
+            {
+                continue;
+            }
             let file_type = path.file_type()?;
             let path = path.path();
             if file_type.is_dir() {

@@ -9,7 +9,7 @@ use std::{path::PathBuf, str::FromStr};
 use crate::config::{Config, EdnConfig};
 use crate::sort::DependencyGraph;
 
-const IGNORE_LIST: [&str; 2] = ["out.bend", "main.bend"];
+const IGNORE_LIST: [&[u8]; 3] = [b"out.bend", b"main.bend", b"build"];
 
 fn main() -> Result<(), String> {
     //#[cfg(debug_assertions)]

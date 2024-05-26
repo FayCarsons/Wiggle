@@ -57,7 +57,7 @@ impl Config {
             match source {
                 Source::GitHub(url) => {
                     let location = &build_dir.join(name);
-                    Repository::clone_recurse(url.as_str(), location)
+                    Repository::clone(url.as_str(), location)
                         .map_err(|e| format!("Error fetching repo \"{name}\": {e}"))?;
                     walker
                         .fold(location)
