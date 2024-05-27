@@ -7,7 +7,7 @@ use crate::{walker::DirWalker, IGNORE_LIST};
 type Queue<T> = VecDeque<T>;
 
 pub struct DependencyGraph {
-    dependencies: HashMap<String, HashSet<String>>,
+    dependencies: HashMap<String, Vec<String>>,
     dependents: HashMap<String, usize>,
 }
 
@@ -32,7 +32,7 @@ impl DependencyGraph {
 
     fn get_dependencies(
         modules: &HashMap<String, String>,
-    ) -> Result<HashMap<String, HashSet<String>>, String> {
+    ) -> Result<HashMap<String, Vec<String>>, String> {
         let mut dependencies = HashMap::with_capacity(modules.len());
 
         for (module, contents) in modules {
@@ -55,14 +55,15 @@ impl DependencyGraph {
                         None
                     }
                 })
-                .collect::<Result<HashSet<String>, String>>()?;
+                .collect::<Result<Vec<String>, String>>()?;
+
             dependencies.insert(module.clone(), deps);
         }
 
         Ok(dependencies)
     }
 
-    fn get_dependents(dependencies: &HashMap<String, HashSet<String>>) -> HashMap<String, usize> {
+    fn get_dependents(dependencies: &HashMap<String, Vec<String>>) -> HashMap<String, usize> {
         let mut dependents = HashMap::<String, usize>::from_iter(
             dependencies.keys().cloned().zip(std::iter::repeat(0usize)),
         );
