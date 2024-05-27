@@ -102,7 +102,8 @@ impl DependencyGraph {
                     if let Some(num_deps) = self.dependents.get_mut(dep) {
                         *num_deps -= 1;
                         if *num_deps == 0 {
-                            queue.push_back(dep.clone())
+                            queue.push_back(dep.clone());
+                            self.dependents.remove(dep);
                         }
                     }
                 }

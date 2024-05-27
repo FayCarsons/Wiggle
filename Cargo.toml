@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+chrono = { version = "0.4.38", features = ["serde"] }
 clap = { version = "4.5.4", features = ["derive"] }
 edn-rs = { version = "0.17.5", features = ["json"] }
 git2 = "0.18.3"

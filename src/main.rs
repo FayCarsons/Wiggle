@@ -1,19 +1,28 @@
 #![feature(iter_intersperse)]
 mod config;
+mod metadata;
 mod sort;
 mod walker;
 
 use std::fs;
 use std::{path::PathBuf, str::FromStr};
 
-use crate::config::{Config, EdnConfig};
+use crate::config::Config;
 use crate::sort::DependencyGraph;
+use crate::walker::DirWalker;
 
 const IGNORE_LIST: [&[u8]; 3] = [b"out.bend", b"main.bend", b"build"];
+const BUILD_DIR: &str = ".build";
 
 fn main() -> Result<(), String> {
     //#[cfg(debug_assertions)]
     std::env::set_current_dir("/Users/fay/Desktop/Code/bend/pathtracer").unwrap();
+
+    #[cfg(debug_assertions)]
+    if PathBuf::from_str(BUILD_DIR).unwrap().exists() {
+        fs::remove_dir_all(BUILD_DIR).unwrap();
+        fs::create_dir(BUILD_DIR).unwrap();
+    }
 
     let out = PathBuf::from_str("./out.bend").unwrap();
     if out.exists() {
@@ -31,10 +40,9 @@ fn main() -> Result<(), String> {
     );
 
     let config = fs::read_to_string(config_path).expect("Cannot read \'deps.edn\'");
-    let config: Config = serde_json::from_str::<EdnConfig>(&config)
-        .expect("Invalid syntax in \'deps.edn\'")
-        .parse_sources()?;
-    let modules = config.to_modules()?;
+    let config: Config =
+        edn_rs::from_str::<Config>(&config).map_err(|e| format!("Error parsing config: {e}"))?;
+    let modules = DirWalker::try_from(&config)?;
     let ordered = DependencyGraph::with_modules(&modules)?.topological_sort()?;
 
     let output = ordered.iter().try_fold(String::new(), |mut acc, name| {
@@ -55,6 +63,8 @@ fn main() -> Result<(), String> {
 
     fs::write("out.bend", output).map_err(|e| format!("Error writing \'out.bend\': {e}"))?;
 
+    #[cfg(debug_assertions)]
     println!("config: {config:#?}\nordered: {ordered:#?}");
+
     Ok(())
 }

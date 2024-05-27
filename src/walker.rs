@@ -1,7 +1,17 @@
 use hashbrown::HashMap;
-use std::{fs, os::unix::prelude::OsStrExt, path::Path};
+use std::{
+    fs,
+    os::unix::prelude::OsStrExt,
+    path::{Path, PathBuf},
+    str::FromStr,
+};
 
-use crate::IGNORE_LIST;
+use git2::Repository;
+
+use crate::{
+    config::{Config, Source},
+    BUILD_DIR, IGNORE_LIST,
+};
 
 #[derive(Clone)]
 pub struct DirWalker {
@@ -60,5 +70,57 @@ impl DirWalker {
 
     pub fn fold<P: AsRef<Path>>(&mut self, root: P) -> std::io::Result<()> {
         self.walk(root)
+    }
+}
+
+impl TryFrom<&Config> for DirWalker {
+    type Error = String;
+
+    fn try_from(value: &Config) -> Result<Self, Self::Error> {
+        let build_dir = PathBuf::from_str(BUILD_DIR).unwrap();
+
+        let mut walker =
+            DirWalker::walk_dir(".").map_err(|e| format!("Error collecting local modules: {e}"))?;
+
+        #[cfg(debug_assertions)]
+        println!("Local modules: {:#?}", walker.modules.clone().keys());
+
+        for (ref name, source) in value.deps.iter() {
+            match source {
+                Source::GitHub(url) => {
+                    let location = &build_dir.join(name);
+                    if location.exists()
+                        && location
+                            .read_dir()
+                            .is_ok_and(|mut dir| dir.next().is_none())
+                    {
+                        continue;
+                    }
+                    Repository::clone(url.as_str(), location)
+                        .map_err(|e| format!("Error fetching repo \"{name}\": {e}"))?;
+                    walker
+                        .fold(location)
+                        .map_err(|e| format!("Error collecting modules from repo {url:?}: {e}"))?;
+
+                    #[cfg(debug_assertions)]
+                    println!(
+                        "Got Git directory {url:?}, modules: {:#?}",
+                        walker.modules.keys().clone()
+                    )
+                }
+                Source::Local(ref path) => {
+                    walker
+                        .fold(path)
+                        .map_err(|e| format!("Error collecting modules in {path:?}: {e}"))?;
+                    #[cfg(debug_assertions)]
+                    println!(
+                        "Got local dependency {path:?}, modules: {:#?}",
+                        walker.modules.keys().clone()
+                    )
+                }
+            }
+        }
+
+        Ok(walker)
     }
 }
