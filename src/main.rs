@@ -15,7 +15,7 @@ const IGNORE_LIST: [&[u8]; 3] = [b"out.bend", b"main.bend", b"build"];
 const BUILD_DIR: &str = ".build";
 
 fn main() -> Result<(), String> {
-    //#[cfg(debug_assertions)]
+    #[cfg(debug_assertions)]
     std::env::set_current_dir("/Users/fay/Desktop/Code/bend/pathtracer").unwrap();
 
     #[cfg(debug_assertions)]
