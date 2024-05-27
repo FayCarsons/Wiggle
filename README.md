@@ -12,10 +12,9 @@ Wiggle uses the [edn format](https://github.com/edn-format/edn) for configuratio
 Here is an example using a local package and another from GitHub:
 
 ```clojure
-{:deps {
-  :foo {:path "path/to/local/project"}
-  :bar {:git "https://github.com/HaskellCurry/Bar"}
-}}
+{:deps 
+  {:foo {:path "path/to/local/project"}
+   :bar {:git "https://github.com/HaskellCurry/Bar"}}}
 ```
 
 # Plans
