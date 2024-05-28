@@ -8,14 +8,36 @@ with the correct ordering.
 
 # Declaring dependencies
 
-Wiggle uses the [edn format](https://github.com/edn-format/edn) for configuration.
+Wiggle uses the [EDN format](https://github.com/edn-format/edn) for configuration.
 Here is an example using a local package and another from GitHub:
 
 ```clojure
 {:deps 
-  {:foo {:path "path/to/local/project"}
+  {; local dependency (outside the current module)
+   :foo {:path "../your-bend-project-here"}
+   ; GitHub dependency
    :bar {:git "https://github.com/HaskellCurry/Bar"}}}
 ```
+
+If you have no dependencies outside the current project, use an empty map:
+
+```clojure
+{:deps {}}
+```
+
+# Installing Wiggle
+
+Clone from repo and install w/ cargo:
+
+```bash
+git clone https://github.com/FayCarsons/Wiggle &&
+cd wiggle &&
+cargo +nightly build --release &&
+cargo install --path .
+```
+
+Now run `wiggle build` in the root of your project and it will output a single
+`out.bend` file with all your dependencies in it.
 
 # Plans
 
