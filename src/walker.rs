@@ -109,9 +109,13 @@ impl TryFrom<&Config> for DirWalker {
                     )
                 }
                 Source::Local(ref path) => {
+                    #[cfg(debug_assertions)]
+                    println!("Fetching local dependency: {:#?}", path);
+
                     walker
                         .fold(path)
-                        .map_err(|e| format!("Error collecting modules in {path:?}: {e}"))?;
+                        .map_err(|e| format!("Error collecting modules in {:#?}: {e}", path))?;
+
                     #[cfg(debug_assertions)]
                     println!(
                         "Got local dependency {path:?}, modules: {:#?}",

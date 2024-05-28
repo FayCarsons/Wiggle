@@ -1,9 +1,6 @@
-use git2::Repository;
 use hashbrown::HashMap;
 use std::{path::PathBuf, str::FromStr};
 use url::Url;
-
-use crate::walker::DirWalker;
 
 #[derive(Clone, Debug)]
 pub enum Source {
@@ -29,9 +26,10 @@ impl edn_rs::Deserialize for Config {
                     let as_str = url.to_string();
                     Source::GitHub(url::Url::parse(as_str.trim_matches('\"')).map_err(|e| format!("Invalid git url in package {}:\n {as_str:?} -> {e}", dep))?)
                 } else if let Some(path) = source.get(":path") {
-                   Source::Local(PathBuf::from_str(&path.to_string()).map_err(|_| edn_rs::EdnError::ParseEdn(format!("Invalid path for module {dep}: {path}")))?) 
+                    let path = path.to_string();
+                   Source::Local(PathBuf::from_str(path.trim_matches(&['\\', '\"'])).map_err(|_| edn_rs::EdnError::ParseEdn(format!("Invalid path for module {dep}: {path}")))?) 
                 } else {
-                    return Err(edn_rs::EdnError::Deserialize(format!("Package {dep} is missing a \':path\' or \'git\' field in its configuration")))
+                    return Err(edn_rs::EdnError::Deserialize(format!("Package {dep} is missing a \':path\' or \':git\' field in its configuration")))
                 };
 
                 Ok((dep.to_string(), package_source))
