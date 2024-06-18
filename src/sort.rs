@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use hashbrown::{HashMap, HashSet};
+use hashbrown::HashMap;
 
 use crate::{walker::DirWalker, IGNORE_LIST};
 

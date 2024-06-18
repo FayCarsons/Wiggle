@@ -1,4 +1,3 @@
-
 # Wiggle
 
 Minimal dependency manager for the Bend language. Currently supports local and
@@ -12,7 +11,7 @@ Wiggle uses the [EDN format](https://github.com/edn-format/edn) for configuratio
 Here is an example using a local package and another from GitHub:
 
 ```clojure
-{:deps 
+{:deps
   {; local dependency (outside the current module)
    :foo {:path "../your-bend-project-here"}
    ; GitHub dependency
